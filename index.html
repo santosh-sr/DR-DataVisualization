@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<title>Control Panel</title>
+		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
+  		<script type="text/javascript" src="./jslib/heatmap.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>	
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> 
+  		<script src="http://maps.googleapis.com/maps/api/js?libraries=geometry,visualization&sensor=true"></script>
+		<script src="./jslib/controlpanel.js"></script>
+		<script src="./jslib/histogram.js"></script>
+
+
+	</head>
+	<body>
+		<div id="part1">
+			<h2>Control Panel</h2>
+			<div id="dataset">
+				<label for="dataset">Data Set</label><br/>
+				<select id="ds_select" onchange="fnSelectData(value)">
+					<option value="select">--select--</option>
+					<option value="Campus Cruiser">Campus Cruiser</option>
+					<option value="BasketBall">Basketball</option>
+					<option value="Twitter">Twitter</option>
+				</select>			
+			</div>
+			<div id="viz" name="viz" style="visibility: hidden">
+				<p>Select the Visualization you want to see</p>
+				<input type="checkbox" name="vizList"  value="Histogram">Histogram<br>
+				<input type="checkbox" name="vizList"  value="ScatterPlot">Scatter Plot<br>
+				<input type="checkbox" name="vizList"  value="BubblePlot">Bubble Plot<br>
+				<input type="checkbox" name="vizList"  value="HeatMap">Heat Map<br>
+			</div>
+			<div id="objectset" name="objectset" class="objectset">
+			</div>
+		</div>
+	</body>
+</html>
