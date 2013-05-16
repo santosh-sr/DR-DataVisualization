@@ -1,61 +1,1044 @@
 		<html>
   <head>
+    <title>Spatiotemporal Data Analytics Tool</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
-  <!--  <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script> -->
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="./jslib/jquery.multiselect.css" />
+<!--   <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>  -->
    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> 
   <script src="http://maps.googleapis.com/maps/api/js?libraries=geometry,visualization&sensor=true"></script>
-  <script type="text/javascript" src="./jslib/heatmap.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+  <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
+  <script src="./jslib/heatmap.js"></script>
+  <script src="./jslib/heatmap-lib.js"></script>
+  <script src="./jslib/util.js"></script>
+  <script src="./jslib/util.js"></script>
+   <script src="./jslib/controlpanel.js"></script>
+  <script type="text/javascript" src="./jslib/jquery.multiselect.js"></script> 
+  <script src="./jslib/jquery.multiselect.filter.js"></script>
 
     <style type="text/css">
 
-html, body, #map {
+#slider-range{width: 500px; left: 10px;visibility: visible;}
+ #map{
   width: 100%;
-  height: 100%;
+  height: 90%;
   margin: 0;
   padding: 0;
+  position:relative;
+  /*background-color:#FFFFFF;*/
+  background-color:#123456;
 }
+
+#rounded{ /* the outermost div element */
+      width:800px;
+      margin:20px auto; /*center it on the page*/
+  }
+
+  .container{ /* this one contains our navigation, titles, and fetched content */
+      background-color:#FFFFFF;
+      padding:10px 20px 20px 20px;
+  }
+
+  input[type="button"] {
+    -moz-box-shadow:inset 0px -4px 0px 0px #ffffff;
+    -webkit-box-shadow:inset 0px -4px 0px 0px #ffffff;
+    box-shadow:inset 0px -4px 0px 0px #ffffff;
+    background-color:#ededed;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px;
+    border:2px solid #dbdbdb;
+    display:inline-block;
+    color:#777777;
+    font-family:arial;
+    font-size:14px;
+    font-weight:bold;
+    padding:6px 24px;
+    text-decoration:none;
+    text-shadow:1px 1px 0px #ffffff;
+    height: 29px;
+  }input[type="button"]:hover {
+    background-color:#dfdfdf;
+  }input[type="button"]:active {
+    position:relative;
+    top:1px;
+  }
+
+  h1{ /* the heading */
+      font-size:28px;
+      font-weight:bold;
+      font-family:"Trebuchet MS",Arial, Helvetica, sans-serif;
+  }
+
+  h3{ /* the subheading */
+      font-weight:normal;
+      font-size:20px;
+
+      color:#999999;
+  }
+
+  select{
+     width: 100px;
+     height: 28px;
+     overflow: hidden;
+  /*   background: url(new_arrow.png) no-repeat right #ddd;*/
+     border: 1px solid #ccc;
+   }
+
+   label {
+    color: #B4886B;
+    font-weight: bold;
+    display: block;
+    /*width: 150px;*/
+    float: left;
+  }
+
+  p{
+    color: #B4886B;
+    font-weight: bold;
+    display: block;
+  }
+
+  body{ /* styling the body */
+      margin-top:20px;
+     /* color:#51555C;*/
+      font-size:16px;
+      background-color:#123456;
+  }
+
+  #menu_div{  /* the container that holds our AJAX loaded content */
+      margin-top:20px;
+
+      border:1px dashed #cccccc;
+      padding:10px;
+
+      -moz-border-radius: 5px;  /* rounding the element */
+      -khtml-border-radius: 5px;
+      -webkit-border-radius: 5px;
+      border-radius: 5px;
+  }
+
+  input[type="text"]{
+    border:2px solid #48433a;
+    border-radius:10px;
+    height: 22px;
+    width: 230px;
+  }
+
+  .styled-select-option select{
+     width: 180px;
+     height: 28px;
+     overflow: hidden;
+  /*   background: url(new_arrow.png) no-repeat right #ddd;*/
+     border: 1px solid #ccc;
+   }
 
 
     </style>
   </head>
 
   <body>
-    <div id="map"></div>
+    <div id="rounded">
+      <img src="img/top_bg.gif" />
+      <div id="main" class="container">
+
+      <h1 align="center">Spatiotemporal Data Analytics Tool</h1> 
+      <div id="control">
+          <div id="dataset" class = "styled-select-option">
+            <label for="dataset">Data Set :</label> </br>
+            <div id="select-combo">
+                <select id="ds_select" onchange="fnSelectData(value)">
+                  <option value="select">--select--</option>
+                  <option value="Campus Cruiser">Campus Cruiser</option>
+                  <option value="BasketBall">Basketball</option>
+                  <option value="Twitter">Twitter</option>
+                </select> 
+            </div>   
+            <br> 
+          </div>
+
+           <div id="extradata_set" class = "styled-select-option">
+            <label for="extradata_set">Metadata Parameters:</label> </br>
+            <div id="extradata-select-combo" name="extradata-select-combo" >
+                <select id="extradata-select"  multiple="multiple">
+                  <!-- <option value="select">--select--</option> -->
+                  <option value="users">users</option>
+                  <option value="time">time</option>
+                  <option value="filter_tag">filter_tag</option> 
+                </select> 
+            </div>    
+          </div>
+
+          <div id="objectset" name="objectset" class="objectset" style="visibility: hidden; display: none; ">
+            <span>
+              <p>Select the objects that you want to trace</p>
+              
+              <select id="objects-combo" class = "objects-combo" id="combo" multiple="multiple"></select>
+            </span>
+    
+          </div>
+
+          </br>
+          <div id="parent-slider-div"  style="visibility: hidden; display: none;">
+            <div id="slider-div">
+                <div id="time-label-header">
+                  <label for="range">Time range:&nbsp;</label>
+                  <input type="text" id="range" style="border: 0; color: #f6931f; font-weight: bold; width: 300px;" />
+              </div>
+            </div>
+            </br>
+
+            <div id="slider-range"></div>
+          </div>
+
+           </br> 
+            <div id="basket-ball-period" style="visibility: hidden; display: none;">  
+              <div id="periodCombo">
+                <label for="period_label">Period Time: &nbsp;</label>
+                <select id="bb_time_period" onchange="onPeriodSelection(value)">
+                  <option value="select">--All Period--</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
+              <br/> 
+            </div>
+
+          <!--   </br>  -->
+            <div id="filter_tag"  style="visibility: hidden; display: none;">
+              <label for="filter_range">Filter Tag:&nbsp;</label>
+              <input type="text" id="filter_text" style="border-style: solid; border-width: 1px; font-weight: bold; width: 300px;" onkeyup="disableFilter()"/>
+              </br>
+              </br>
+              <input type="button" id="filter_button" value="Filter" disabled onClick="filterTag()"/>
+            </div>
+         <!--  </div> -->
+      </div>
+    </div>
+      <img src="img/bottom_bg.gif" />
+  </div>
+
+
+    <div id="map"></div> 
    
     <script type="text/javascript">
+      var objectURL;
+      var objectParamsURL;
+      var objectParams;
+      var jsonData;
+      var objectDataList;
+      var selectedDataSet;
+      var filterDataForObjects = [];
+      var period = -1;
+      var objectsSelected = [];
 
-/* Create the Google Map…
-var map = new google.maps.Map(d3.select("#map").node(), {
-  zoom: 5,
-  center: new google.maps.LatLng(40.56370508, -74.42406423),
-  mapTypeId: google.maps.MapTypeId.TERRAIN
-});
-*/
-//loadViz(data)
+      $(document).ready(function(){
+          metadataSelectCombo();
+          objectsMultiSelectCombo();
+      });
 
-/*$.post("data.php", function(dbDataString){
+      function fnSelectData(value)
+      {
+        removeDivChild();
+        if(value == "select"){
+          selectedDataSet = null;
+          hideMap();
+          return;
+        }
 
-var dbDataJson = jQuery.parseJSON( dbDataString ); //[{"user_id":"79792322","std_timestamp":"2012-10-01 02:40:10-07","latitude":"40.56370508","longitude":"-74.
+        selectedDataSet = value;
+        clearObjectsArray();
+        uncheckMetadataMultiSelectCombo();
+        ajaxCall('');
+        hidePeriodTag();
 
-  var heatmapData = [];
-$.each(dbDataJson, function(i, item) {
-  heatmapData.push(new google.maps.LatLng(dbDataJson[i].latitude, dbDataJson[i].longitude));
-    //alert(dbDataJson[i].latitude + "and" + dbDataJson[i].longitude);
-  });
-//});
+        refreshExtradataMultiSelectCombo(); 
+      }
 
- var heatmap = new google.maps.visualization.HeatmapLayer({
-    data: heatmapData,
-    dissipating: false,
-    map: map
-  });*/
-  // Bind our overlay to the map…
- // overlay.setMap(map);
+      function onPeriodSelection(value){
+        var start;
+        var end;
 
-//});
+        if(value == "select"){
+           period = -1;
+           start = 0;
+           end = 720 * 4;
+           bbFilterSelection(0, 720 * 4);
+        }else{
+          period = value;
+          start = 0;
+          end = 720;
+        }
+
+        slider();
+        bbFilterSelection(start, end);
+      }
+
+      function bbFilterSelection(start, end){
+        var start_label = start/60;
+        var end_label = end/60;
+               
+        $( "#range" ).val( start_label + " - " + end_label);
+
+       var filter_text = document.getElementById("filter_text").value;
+       if(period > 0){
+         start = start + (720 * (period - 1));
+         end = end + (720 * (period - 1));
+       }
+
+       var filterJsonData = filterBBallData(filterDataForObjects, start, end, filter_text);
+        removeDivChild();
+        renderMap(filterJsonData);
+      }
+
+      function deleteOptionInExtradataCombo(optionValue){
+        var option = "#extradata-select option[value='" + optionValue + "']";
+        $(option).remove();
+      }
+
+      function refreshExtradataMultiSelectCombo(){
+        $("#extradata-select").multiselect('refresh');
+      }
+
+      function clearObjectsArray(){
+         objectsSelected.length = 0;
+      }
+
+      function clearObjectsCombo(){
+        $('#objects-combo').empty();
+        refreshObjectsMultiSelectCombo();
+      }
+
+      function metadataSelectCombo(){
+        $("#extradata-select").multiselect({
+             click: function(event, ui){
+              if(selectedDataSet == null){
+                alert("Select the Dataset..");
+                $('#extradata-select').multiselect('uncheckAll');
+                return;
+              }
+
+              var checked = ui.checked;
+              var checkedObject = ui.value;
+
+              var objectIndex = objectsSelected.indexOf(checkedObject);
+            
+              checkMetadataOption(checked, checkedObject);
+            },
+            checkAll: function(){
+              if(selectedDataSet == null){
+                alert("Select the Dataset..");
+                $('#extradata-select').multiselect('uncheckAll');
+                return;
+              }
+
+              var opts = $('#extradata-select')[0].options;
+
+              var array = $.map(opts, function( elem ) {
+                  checkMetadataOption(true, elem.value);
+              });
+           },
+            uncheckAll: function(){
+
+              var opts = $('#extradata-select')[0].options;
+
+              var array = $.map(opts, function( elem ) {
+                  checkMetadataOption(false, elem.value);
+              });
+
+         },
+
+         });
+
+          //Multi select filter
+         $("#extradata-select").multiselect().multiselectfilter({
+          width: 200
+         });
+      }
+
+      function checkMetadataOption(checked, checkedOption){
+         if(checked){
+                if(checkedOption == "users"){
+                  showObjectsMultiSelectCombo();
+                  fnProduceObjectList(selectedDataSet);
+                }else if(checkedOption == "time"){
+                    showSlider();
+                    slider();
+
+                    if(selectedDataSet == "BasketBall"){
+                      showPeriodTag();
+                    }
+                }else if(checkedOption == "filter_tag"){
+                    showFilterTag();
+                }
+        }else{
+                if(checkedOption == "users"){
+                  hideObjectsMultiSelectCombo();
+                  clearObjectsCombo();
+                }else if(checkedOption == "time"){
+                    hideSlider();
+
+                    if(selectedDataSet == "BasketBall"){
+                      hidePeriodTag();
+                    }
+                }else if(checkedOption == "filter_tag"){
+                   hideFilterTag();
+                }
+        }
+
+         $("#filter_text").val('');
+      }
+
+      function showMap(){
+        $('#map').show();
+      }
+
+      function hideMap(){
+        $('#map').hide();
+      }
+
+      function showPeriodTag(){
+        document.getElementById("basket-ball-period").style.visibility = 'visible';
+        $('#basket-ball-period').show();
+      }
+
+      function hidePeriodTag(){
+        document.getElementById("basket-ball-period").style.visibility = 'hidden';
+        $('#basket-ball-period').hide();
+      }
+
+      function showSlider(){
+        document.getElementById("parent-slider-div").style.visibility = 'visible';
+        $('#parent-slider-div').show();
+      }
+
+      function hideSlider(){
+        document.getElementById("parent-slider-div").style.visibility = 'hidden';
+        $('#parent-slider-div').hide();
+      }
+
+      function showFilterTag(){
+        document.getElementById("filter_tag").style.visibility = 'visible';
+        $('#filter_tag').show();
+      }
+
+      function hideFilterTag(){
+        document.getElementById("filter_tag").style.visibility = 'hidden';
+        $('#filter_tag').hide();
+      }
+
+      function clearMetadataMultiSelectCombo(){
+        $('#extradata-select').empty();
+        refreshMetadataMultiSelectCombo();
+      }
+
+      function uncheckMetadataMultiSelectCombo(){
+        $('#extradata-select').multiselect("uncheckAll");
+        refreshMetadataMultiSelectCombo();
+      }
+
+      function refreshMetadataMultiSelectCombo(){
+        $("#extradata-select").multiselect('refresh');
+      }
+
+      function showObjectsMultiSelectCombo(){
+        document.getElementById("objectset").style.visibility = 'visible';
+        $("#objectset").show();
+      }
+
+      function hideObjectsMultiSelectCombo(){
+        document.getElementById("objectset").style.visibility = 'hidden';
+        $("#objectset").hide();
+      }
+
+      function refreshObjectsMultiSelectCombo(){
+        $("#objects-combo").multiselect('refresh');
+      }
+
+      function objectsMultiSelectCombo(){
+          $("#objects-combo").multiselect({
+          click: function(event, ui){
+            var checked = ui.checked;
+            var checkedObject = ui.value;
+            var objectIndex = objectsSelected.indexOf(checkedObject);
+            if(checked){
+              //Add the item in array
+              if(objectIndex < 0){
+                objectsSelected.push(checkedObject);
+              }
+            }else{
+              //Remove the item in array when unchecked from multiselect
+              if(objectIndex >= 0){
+                objectsSelected.splice(objectIndex, 1);
+              }
+            }
+
+            renderMapWithFilterObjects(jsonData, objectsSelected);
+         },
+          checkAll: function(){
+            objectsSelected.length = 0;
+            objectsSelected = $("#objects-combo").multiselect("getChecked").map(function(){
+               return this.value;    
+            }).get();
+
+            refreshObjectsMultiSelectCombo();
+            renderMapWithFilterObjects(jsonData, objectsSelected);
+         },
+         uncheckAll: function(){
+            objectsSelected.length = 0;
+            refreshObjectsMultiSelectCombo();
+           renderMapWithFilterObjects(jsonData, objectsSelected);
+         }
+         }); 
+
+         $("#objects-combo").multiselect().multiselectfilter({
+          width: 200
+         });
+      }
+
+      function isOptionChecked(checkedOptions, option){
+        for(x in checkedOptions){
+          selectedOption = checkedOptions[x];
+
+          if(selectedOption == option){
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      function onCheck(){
+        if(document.getElementById("all_bb_period_checkbox").checked){
+          document.getElementById("bb_time_period").disabled = true;
+        }else{
+          document.getElementById("bb_time_period").disabled = false;
+        }
+      }
+
+      function renderMapWithFilterObjects(jsonData, objectsSelected){
+          filterDataForObjects = filterOnObjects(jsonData, objectsSelected);
+
+          var filterJsonData = filterDataForObjects;
+
+           if(filterJsonData.length > 0){
+             var checkedOptions  = $("#extradata-select").multiselect("getChecked").map(function(){
+                 return this.value;    
+              }).get();
+
+            if(isOptionChecked(checkedOptions, "filter_tag")){
+
+              var filter_text = document.getElementById("filter_text").value;
+
+              if(filter_text.length > 0){
+                filterJsonData = filterTwitterAndCruiserDataWithTag(filterDataForObjects, filter_text);
+              }
+            }
+
+            if(isOptionChecked(checkedOptions, "time")){
+              if(selectedDataSet == "Twitter" || selectedDataSet == "Campus Cruiser"){
+                var start = $.datepicker.formatDate('dd/MM/yy', createDate($( "#slider-range" ).slider( "values", 0 ) ));
+                var end = $.datepicker.formatDate('dd/MM/yy', createDate($( "#slider-range" ).slider( "values", 1 ) ));
+
+                var end_date = new Date($( "#slider-range" ).slider( "values", 1 ));
+                       
+                end_date.setDate(end_date.getDate() + 1);
+                end = $.datepicker.formatDate('dd/MM/yy', end_date);
+
+                var filter_text = document.getElementById("filter_text").value;
+                filterJsonData = filterTwitterAndCruiserData(filterDataForObjects, new Date(start), new Date(end), filter_text);
+              }else{
+                bbFilterSelection($( "#slider-range" ).slider( "values", 0 ) , $( "#slider-range" ).slider( "values", 1 ) );
+                return;
+              }
+            }
+          }
+
+          removeDivChild();
+          renderMap(filterJsonData);
+      }
+
+      function disableFilter(){
+        var filter_text = document.getElementById("filter_text").value;
+
+        if(filter_text.length <= 0){
+          document.getElementById("filter_button").disabled = true;
+          filterTag();
+        }else{
+           document.getElementById("filter_button").disabled = false;
+        }
+      }
+
+      function filterTag(){
+        var filterJsonData = [];
+        var filter_text = document.getElementById("filter_text").value;
+        if(isGeoSpatial(selectedDataSet)){
+          filterJsonData = filterTwitterAndCruiserDataWithTag(filterDataForObjects, filter_text);
+        }else{
+          filterJsonData = filterBBallDataWithTag(filterDataForObjects, filter_text);
+        }
+
+        removeDivChild();
+        renderMap(filterJsonData);
+      }
+
+        function fnProgressBar(){
+    
+           showProgressBar();
+           var progressbar = $('#progressbar'),  
+            max = progressbar.attr('max'),  
+            time = (1000/max)*5,      
+            value = progressbar.val();  
+            ajaxCall(objectParamsURL);
+            random = getRandomInt(25, 50);
+            console.log("max: " + max);
+            flag = false;
+          
+        var loading = function() {  
+            if(value <= random){
+              value += 1;  
+              addValue = progressbar.val(value);  
+                    
+              $('.progress-value').html(value + '%'); 
+            }
+
+            if(value >= random && value <= max && (jsonData == null || jsonData.length <= 0)){
+              
+              setTimeout(function() {
+               
+                if(value <= max){
+                  value += 1;  
+                  addValue = progressbar.val(value);  
+                    
+                  $('.progress-value').html(value + '%'); 
+                 
+                  }
+                } , 3000); 
+            }
+      
+            if (value >= max || (jsonData != null && jsonData.length > 0)) {  
+              while(value <= max){
+                 value += 1;  
+                 addValue = progressbar.val(value);  
+                  
+                 $('.progress-value').html(value + '%'); 
+              }
+
+              clearInterval(animate);    
+              progressbar.val(0);
+              hideProgressBar();
+            }  
+        };  
+      
+        var animate = setInterval(function() {  
+            loading();  
+        }, time);  
+ 
+      }
+
+      /**
+       * Returns a random integer between min and max
+       * Using Math.round() will give you a non-uniform distribution!
+       */
+      function getRandomInt (min, max) {
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function hideProgressBar(){
+        document.getElementById("progress-bar-id").style.visibility = 'hidden';   
+        document.getElementById("progress-bar-id").style.display = 'none'; 
+      }
+
+      function showProgressBar(){
+        document.getElementById("progress-bar-id").style.visibility = 'visible';   
+        document.getElementById("progress-bar-id").style.display = 'block'; 
+      }
+
+      function slider(){
+        if(isGeoSpatial(selectedDataSet)){
+          
+          min = getMinDate(filterDataForObjects).getTime();
+          max = getMaxDate(filterDataForObjects).getTime();
+
+          if(!min && !max){
+            alert("Incorrect date");
+          }
+
+          $( "#slider-range" ).slider({
+              range: true,
+              min: min,
+              max: max,
+                step: 86400000,
+              values: [ min, max ],
+                slide: function( event, ui ) {
+                  
+                  var start = $.datepicker.formatDate('dd/MM/yy', createDate(ui.values[ 0 ]));
+                  var end = $.datepicker.formatDate('dd/MM/yy', createDate(ui.values[ 1 ] ));
+                  $( "#range" ).val(start  + " - " + end);
+
+                  var end_date = new Date($( "#slider-range" ).slider( "values", 1 ));
+                 
+                  end_date.setDate(end_date.getDate() + 1);
+                  end = $.datepicker.formatDate('dd/MM/yy', end_date);
+
+                  var filter_text = document.getElementById("filter_text").value;
+                  var filterJsonData = filterTwitterAndCruiserData(filterDataForObjects, new Date(start), new Date(end), filter_text);
+                 
+                  removeDivChild();
+                  renderMap(filterJsonData);
+                 }
+          });
+
+            $( "#range" ).val( $.datepicker.formatDate('dd/MM/yy', createDate($( "#slider-range" ).slider( "values", 0 ))) +
+                " - " + $.datepicker.formatDate('dd/MM/yy', createDate($( "#slider-range" ).slider( "values", 1 ))));
+        }else{
+         
+          min = 0;
+          max = 720;
+
+         /* var checkedOptions  = $("#extradata-select").multiselect("getChecked").map(function(){
+                 return this.value;    
+              }).get();
+
+          if(isOptionChecked(checkedOptions, "period")){
+
+              var comboElement = document.getElementById("bb_time_period");
+              period = comboElement.options[comboElement.selectedIndex].innerHTML;
+
+              if(selectedOption == "select"){
+                  alert("Select the period.");
+                  return;
+               }
+           }*/
+
+          if(period <= -1){
+             max = max * 4;
+          }
+
+          if(!min && !max){
+            alert("Incorrect Range");
+          }
+
+          $( "#slider-range" ).slider({
+              range: true,
+              min: min,
+              max: max,
+              step: 60,
+           //   animate: "fast",
+              values: [ min, max ],
+                slide: function( event, ui ) {
+                  bbFilterSelection(ui.values[ 0 ], ui.values[ 1 ]);
+                  /*var start = (ui.values[ 0 ]);
+                  var end = (ui.values[ 1 ]);
+                  var start_label = start/60;
+                  var end_label = end/60;
+               
+                  $( "#range" ).val( start_label + " - " + end_label);
+
+                  var filter_text = document.getElementById("filter_text").value;
+                  var filterJsonData = filterBBallData(filterDataForObjects, start, end, filter_text);
+                  removeDivChild();
+                  renderMap(filterJsonData);*/
+               }
+          });
+
+          start = $( "#slider-range" ).slider( "values", 0 ) / 60;
+          end = $( "#slider-range" ).slider( "values", 1 ) / 60;
+            $( "#range" ).val(start +
+                " - " + end);
+
+        }
+      }
+
+      function removeDivChild(){
+        mydiv = document.getElementById('map');
+        while ( mydiv.firstChild ) { 
+          mydiv.removeChild( mydiv.firstChild );
+        }
+      }
+
+      function countTwitterAndCruiserCoordinates(jsonData){
+        var map = [];
+        var counter = 0;
+        
+        for (i in jsonData) {
+          x_pos = jsonData[i].object_position_x;
+          y_pos = jsonData[i].object_position_y;
+          
+          var key;  
+          var found = false;
+          
+          for(var obj in map) {
+            var key = map[obj];
+
+            if((x_pos == key.object_position_x)  &&  (y_pos == key.object_position_y)){
+              var count = key.count;
+              key.count = count + 1;
+              
+              found = true;
+              break;
+            }
+          }
+
+          if(!found){
+            var newObject = jQuery.extend(true, {}, jsonData[i]);
+            newObject.count = 1;
+            
+            map.push(newObject);
+            counter++;
+          }
+        }
+
+        return map;
+      }
+
+      function filterTwitterAndCruiserData(filterDataForObjects, startTime, endTime, tag){
+        var filterJsonData = [];
+        
+        for(var data in filterDataForObjects){
+           var timestamp = createDate(filterDataForObjects[data].timestamp);
+           var tag_text = filterDataForObjects[data].tag_text;
+
+           if(timestamp >= startTime && timestamp <= endTime){
+              if(tag != null && tag.length > 0){
+                console.log("tag_text :" + tag_text + "-----" + "tag: "+ tag);
+                if(tag_text != null && (tag_text.indexOf(tag) >= 0 || tag_text == tag)){
+                  filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+                }
+              }else{
+                filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+              }
+           }
+        }
+
+        return filterJsonData;
+      }
+
+       function filterBBallData(filterDataForObjects, startTime, endTime, tag){
+        var filterJsonData = [];
+       
+        for(var data in filterDataForObjects){
+           jsonObj = filterDataForObjects[data];
+           var timestamp = parseInt(jsonObj.timestamp);
+           var tag_text = filterDataForObjects[data].tag_text;
+
+          timestamp = parseInt(timestamp) + (720 * (jsonObj.period  - 1));   
+
+          if(timestamp >= startTime && timestamp <= endTime){
+/*              console.log("timestamp: " + timestamp + ":  conversion: " + (720 * (jsonObj.period  - 1)) +"::" + "startTime: " + startTime + ":: endTime: " + endTime + "  ::period: " + jsonObj.period);*/
+              if(tag != null && tag.length > 0){
+                if(tag_text != null && (tag_text.indexOf(tag) >= 0 || tag_text == tag)){
+                 filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+                }
+              }else{
+                filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+              }
+           }
+        }
+
+        return filterJsonData;
+      }
+
+      //New Method
+      function filterTwitterAndCruiserDataWithTag(filterDataForObjects, tag){
+        var filterJsonData = [];
+        
+        for(var data in filterDataForObjects){
+           var tag_text = filterDataForObjects[data].tag_text;
+
+              if(tag != null && tag.length > 0){
+                console.log("tag_text :" + tag_text + "-----" + "tag: "+ tag);
+                if(tag_text != null && (tag_text.indexOf(tag) >= 0 || tag_text == tag)){
+                  filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+                }
+              }else{
+                filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+              }
+        }
+
+        return filterJsonData;
+      }
+
+       function filterBBallDataWithTag(filterDataForObjects, tag){
+        var filterJsonData = [];
+       
+        for(var data in filterDataForObjects){
+           jsonObj = filterDataForObjects[data];
+           var tag_text = filterDataForObjects[data].tag_text;
+
+           if(tag != null && tag.length > 0){
+             if(tag_text != null && (tag_text.indexOf(tag) >= 0 || tag_text == tag)){
+               filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+              }
+           }else{
+             filterJsonData.push(jQuery.extend(true, {}, filterDataForObjects[data]));
+           }
+           
+        }
+
+        return filterJsonData;
+      }
+
+      function createURL(objectParams, startTime, endTime){
+          urlParams = objectParams + "&" + "startTime=" + startTime + "&" + "endTime=" + endTime;
+          if(selectedDataSet == "Twitter"){
+              url ='twitter_heatmap.php?' + urlParams;
+            }else if(selectedDataSet == "BasketBall"){
+              url = 'bb_heatmap.php?' + urlParams;
+            }else if(selectedDataSet == "Campus Cruiser"){
+              url = 'cc_heatmap.php?' + urlParams;
+            }
+
+        return url;
+      }
+
+     function renderMap(jsonData){
+        showMap();
+        mapElem = document.getElementById('map');
+
+        dissipating = true;
+        zoom = 4;
+          
+        if(selectedDataSet == "Campus Cruiser"){
+          zoom = 15;
+        }
+
+        //Create the map
+        if(isNonGeoSpatial(selectedDataSet)){
+          createBasketBallMap(mapElem, jsonData);
+
+        }else{
+          createGeoMap(selectedDataSet, mapElem, jsonData, dissipating, zoom);
+        }
+        
+      }
+
+      function isEmpty(value){
+        return (value == "");
+      }
+
+      function ajaxCall(urlParams){
+        
+        if(selectedDataSet == "Twitter"){
+          if(!isEmpty(urlParams)){
+            url ='twitter_heatmap.php?' + urlParams;
+          }else{
+            url = 'twitter_heatmap.php';
+          }
+        }else if(selectedDataSet == "BasketBall"){
+          if(!isEmpty(urlParams)){
+            url ='bb_heatmap.php?' + urlParams;
+          }else{
+            url = 'bb_heatmap.php';
+          }
+        }else if(selectedDataSet == "Campus Cruiser"){
+          if(!isEmpty(urlParams)){
+            url ='cc_heatmap.php?' + urlParams;
+          }else{
+            url = 'cc_heatmap.php';
+          }
+        }
 
 
+        $.ajax({
+
+        url: url,
+        type: 'GET',
+        dataType: 'text',
+
+        success: function(data){
+
+          jsonData = jQuery.parseJSON(data);
+          filterDataForObjects = jsonData;
+          document.getElementById("map").style.backgroundColor = "#FFFFFF";
+         if(isGeoSpatial(selectedDataSet)){
+            jsonData = countTwitterAndCruiserCoordinates(jsonData);
+          }
+
+          renderMap(jsonData);
+        },
+
+        error: function(error, jqXHR)
+        {
+          alert(jqXHR);
+        }
+
+        
+      });
+      }
+
+      function executeQuery(url){
+         $.ajax({
+
+        url: url,
+        type: 'GET',
+        dataType: 'text',
+
+        success: function(data){
+
+          jsonData = jQuery.parseJSON(data);
+         
+          renderMap(jsonData);
+        },
+
+        error: function(error, jqXHR)
+        {
+          alert(jqXHR);
+        }
+
+        
+      });
+      }
+
+      function getURLParameters() 
+    {
+        var sURL = window.document.URL.toString();  
+        
+        if (sURL.indexOf("?") > 0)
+        {
+           var arrParams = sURL.split("?");   
+           objectURL = arrParams[1];
+           queryParams = arrParams[1];
+           if(queryParams.indexOf("&") > 0){
+              var  queryParamsSplitArray  = queryParams.split("&");
+              var selectedDataSetURL = queryParamsSplitArray[0];
+              if(selectedDataSetURL.indexOf("=") > 0){
+                selectedDataSet = selectedDataSetURL.split("=")[1];
+                selectedDataSet = selectedDataSet.replace("%20", " ");
+              }
+
+              objectParamsURL = "";
+              var firstIteration = true;
+              for(var i=1; i<queryParamsSplitArray.length; i++){
+                if(firstIteration){
+                  objectParams = queryParamsSplitArray[i];
+                   objectParamsURL = queryParamsSplitArray[i];
+                   firstIteration = false;
+                }else{
+                  objectParamsURL += "&" + queryParamsSplitArray[i];
+                }
+
+                if(queryParamsSplitArray[i].indexOf("objects") >= 0){
+                  objectsSelected = queryParamsSplitArray[i];
+                }
+
+                splitArray = queryParamsSplitArray[i].split("=");
+              
+                if(splitArray[0] == "period"){
+                   period = parseInt(splitArray[1]);
+                }
+
+              }
+           }
+           
+        }
+
+        return "No Parameters Found";
+    }
 
     </script>
   </body>

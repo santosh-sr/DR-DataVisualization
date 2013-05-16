@@ -1,0 +1,435 @@
+		<html>
+  <head>
+   <!--  <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/> -->
+  
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> 
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=geometry,visualization&sensor=true"></script>
+  <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> 
+  <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+  <script src="./jslib/controlpanel.js"></script>
+  <script src="./jslib/heatmap.js"></script>
+  <script src="./jslib/util.js"></script>
+
+<style type="text/css">
+#slider-range {width: 500px; left: 10px;}
+#time-slider-option {width: 700px; left: 5px; visibility: hidden; display: none}
+#basket-ball-period {visibility: visible; display: block}
+
+#rounded{	/* the outermost div element */
+	    width:800px;
+	    margin:20px auto;	/*center it on the page*/
+	}
+
+	.container{	/* this one contains our navigation, titles, and fetched content */
+	    background-color:#FFFFFF;
+	    padding:10px 20px 20px 20px;
+	}
+
+	input[type="button"] {
+		-moz-box-shadow:inset 0px -4px 0px 0px #ffffff;
+		-webkit-box-shadow:inset 0px -4px 0px 0px #ffffff;
+		box-shadow:inset 0px -4px 0px 0px #ffffff;
+		background-color:#ededed;
+		-moz-border-radius:6px;
+		-webkit-border-radius:6px;
+		border-radius:6px;
+		border:2px solid #dbdbdb;
+		display:inline-block;
+		color:#777777;
+		font-family:arial;
+		font-size:14px;
+		font-weight:bold;
+		padding:6px 24px;
+		text-decoration:none;
+		text-shadow:1px 1px 0px #ffffff;
+		height: 29px;
+	}input[type="button"]:hover {
+		background-color:#dfdfdf;
+	}input[type="button"]:active {
+		position:relative;
+		top:1px;
+	}
+
+	h1{	/* the heading */
+	    font-size:28px;
+	    font-weight:bold;
+	    font-family:"Trebuchet MS",Arial, Helvetica, sans-serif;
+	}
+
+	h3{	/* the subheading */
+	    font-weight:normal;
+	    font-size:20px;
+
+	    color:#999999;
+	}
+
+	select{
+	   width: 100px;
+	   height: 28px;
+	   overflow: hidden;
+	/*   background: url(new_arrow.png) no-repeat right #ddd;*/
+	   border: 1px solid #ccc;
+	 }
+
+	 label {
+		color: #B4886B;
+		font-weight: bold;
+		display: block;
+		/*width: 150px;*/
+		float: left;
+	}
+
+	p{
+		color: #B4886B;
+		font-weight: bold;
+		display: block;
+	}
+
+	body{	/* styling the body */
+	    margin-top:20px;
+	   /* color:#51555C;*/
+	    font-size:16px;
+	    background-color:#123456;
+	}
+
+	#menu_div{	/* the container that holds our AJAX loaded content */
+	    margin-top:20px;
+
+	    border:1px dashed #cccccc;
+	    padding:10px;
+
+	    -moz-border-radius: 5px;	/* rounding the element */
+	    -khtml-border-radius: 5px;
+	    -webkit-border-radius: 5px;
+	    border-radius: 5px;
+	}
+/*#outer_pane {border-width: 1px; width: 800px; border-style: solid;}*/
+
+</style>
+   <script>
+
+   </script>
+
+  </head>
+
+  <body>
+  	<div id="rounded">
+  	<img src="img/top_bg.gif" /><!-- image with rounded left and right top corners -->
+		<div id="main" class="container">
+			<h1 align="center">Spatiotemporal Data Analytics Tool</h1>
+		<div id = "menu_div">	
+	   	  <input type="button" id="home" value="Home" onClick="goHome()"></input>
+		</div>
+ 
+		<div id="outer_pane">
+
+		    <span>
+		    	<p>Heat Map Options:&nbsp;
+		    		<select id="heatmap" onChange="onSelectOption()">
+		    			<option value="select">--select--</option>
+		    			<option value="Time">Time</option>
+		    		</select>
+
+		    		</br>
+		    	</p>
+
+		    	<div id="progress-bar-id" class="progress-bar-wrapper"  style="visibility: hidden;">
+					<progress id="progressbar" value="0" max="100"></progress>
+					<span class="progress-value">0%</span>
+				</div>
+		    		
+		    	<div id="time-slider-option" style="visibility: hidden;">
+			    	<div id="time-label-header">
+			    		<label for="range">Time range:</label>&nbsp; 
+		  				<input type="text" id="range" style="border: 0; color: #f6931f; font-weight: bold; width: 300px;" />
+			    	</div>
+			    	</br>
+			    	<div id="slider-range"> </div>
+			   	    </br>
+			    	<div id="basket-ball-period">  
+			    		<div id="periodCombo">
+				    		<label for="period_label">Period Time: &nbsp;</label>
+				    		<select id="bb_time_period">
+				    			<option value="select">--select--</option>
+				    			<option value="p1">1</option>
+				    			<option value="p2">2</option>
+				    			<option value="p3">3</option>
+				    			<option value="p4">4</option>
+			    			</select>
+		    			</div>
+		    			<br/>
+		    			<input type="checkbox" id="all_bb_period_checkbox" value="value" onChange="onCheck()"/> All Period
+			    	</div>
+			    	
+			    	</br>
+			    	<div id="generate_button">
+			    		<input type="button" id="generate_heatmap" value="Generate Visualization" onClick="generateHeatmap()"/>
+			    	</div>
+		    	</div>
+
+		  </div>
+
+		</div>
+
+		 <img src="img/bottom_bg.gif" />
+	  </div>
+    </span>
+   
+    <script type="text/javascript">
+    	var objectParamsURL;
+    	var jsonData;
+    	var selectedDataSet;
+    	var queryURL;
+    	
+    	window.onload=function(){
+    		getURLParameters();
+    		ajaxCall(objectParamsURL);
+    	}
+
+    	function goHome(){
+    		window.location.href = "index.html" + "?" + queryURL;
+    	}
+    	
+    	function ajaxCall(urlParams){
+    		
+    		if(selectedDataSet == "Twitter"){
+    			url ='twitter_heatmap.php?' + urlParams;
+    		}else if(selectedDataSet == "BasketBall"){
+    			url = 'bb_heatmap.php?' + urlParams;
+    		}else if(selectedDataSet == "Campus Cruiser"){
+    			url = 'cc_heatmap.php?' + urlParams;
+    		}
+
+	 		$.ajax({
+
+				url: url,
+				type: 'GET',
+				dataType: 'text',
+
+				success: function(data){
+
+					jsonData = jQuery.parseJSON(data);
+					console.log(jsonData);
+					
+				},
+
+				error: function(error, jqXHR)
+				{
+					alert(jqXHR);
+				}
+
+				
+			});
+    	}
+
+    	function generateHeatmap(){
+    		var startTime = $( "#slider-range" ).slider( "values", 0 );
+			var endTime =  $( "#slider-range" ).slider( "values", 1 );
+			var url;
+
+			if(selectedDataSet == "Twitter"){
+				var end_date = createDate(endTime);
+				end_date.setDate(end_date.getDate() + 1);
+				var urlParams = objectParamsURL + "&" + "startTime=" + $.datepicker.formatDate('dd-MM-yy', createDate(startTime)) + "&" + "endTime=" + $.datepicker.formatDate('dd-MM-yy', end_date);
+    			//url ='twitter_heatmap.php?' + urlParams;
+    			url = urlParams;
+    		}else if(selectedDataSet == "BasketBall"){
+    			var period;
+    			if(document.getElementById("all_bb_period_checkbox").checked){
+    			//	url = 'bb_heatmap.php?' + objectParamsURL + "&" + "startTime=" + startTime + "&" + "endTime=" + endTime;
+    				url = objectParamsURL + "&" + "startTime=" + startTime + "&" + "endTime=" + endTime;
+    			}
+    			else{
+					var comboElement = document.getElementById("bb_time_period");
+    				var selectedOption = comboElement.options[comboElement.selectedIndex].innerHTML;
+
+    				if(selectedOption == "select"){
+    					alert("Select the period.");
+    					return;
+    				}
+    				
+    				url = objectParamsURL + "&" + "startTime=" + startTime + "&" + "endTime=" + endTime + "&" + "period=" + selectedOption;
+    			}
+    		}else if(selectedDataSet == "Campus Cruiser"){
+    		
+    			url = objectParamsURL + "&" + "startTime=" + $.datepicker.formatDate('dd-MM-yy', createDate(startTime)) + "&" + "endTime=" + $.datepicker.formatDate('dd-MM-yy', createDate(endTime));
+    		}
+
+    		window.location.href = "heatmap.html?dataset=" + selectedDataSet + "&" + url;
+			
+    	}
+
+    	function onSelectOption(){
+    		
+    		var comboElement = document.getElementById("heatmap");
+    		var selectedOption = comboElement.options[comboElement.selectedIndex].value;
+    		
+    		var min;
+    		var max;
+    		if(selectedOption == "Time"){
+
+    			if(jsonData == null || jsonData.length <= 0){
+	    			showProgressBar();  
+	    			
+	    			fnProgressBar();
+    			}else{
+    				slider();
+    			}
+				
+    		}else if(selectedOption == "select"){
+    			var slider_div = document.getElementById("time-slider-option");
+    			slider_div.style.visibility = "hidden";
+    			slider_div.style.display = "none";
+    		}
+    	}
+
+		function fnProgressBar(){
+		
+		       var progressbar = $('#progressbar'),  
+		        max = progressbar.attr('max'),  
+		        time = (1000/max)*5,      
+		        value = progressbar.val();  
+		      
+			    var loading = function() { 
+
+			    	if(value <= max){
+				        value += 1;  
+				        addValue = progressbar.val(value);  
+				          
+				        $('.progress-value').html(value + '%'); 
+				      
+					      if(jsonData == null || jsonData.length <= 0){
+					        setTimeout(function() {progressbar.val(value + 3);}, 1500);  
+					   	   }
+					}
+				  
+				    if (value >= max) {  
+				      	clearInterval(animate);    
+				       	progressbar.val(0);
+				       	slider();
+				    }  
+
+			    };  
+		  
+		    var animate = setInterval(function() {  
+		        loading();  
+		    }, time);  
+ 
+		}
+
+		function hideProgressBar(){
+			document.getElementById("progress-bar-id").style.visibility = 'hidden';   
+		    document.getElementById("progress-bar-id").style.display = 'none'; 
+		}
+
+		function showProgressBar(){
+	        document.getElementById("progress-bar-id").style.visibility = 'visible';   
+	        document.getElementById("progress-bar-id").style.display = 'block'; 
+	     }
+
+		function slider(){
+			var slider_div = document.getElementById("time-slider-option");
+    			slider_div.style.visibility = "visible";
+    			slider_div.style.display = "block";
+
+    		var bb_period_div = document.getElementById("basket-ball-period");
+			bb_period_div.style.visibility = "hidden";
+    		bb_period_div.style.display = "none";
+
+    		hideProgressBar();
+			if(selectedDataSet == "Twitter" || selectedDataSet == "Campus Cruiser"){
+					
+					min = getMinDate(jsonData).getTime();
+					max = getMaxDate(jsonData).getTime();
+
+					console.log("min: " + createDate(getMinDate(jsonData)));
+					console.log("max: " + createDate(getMaxDate(jsonData)));
+
+					if(!min && !max){
+						alert("Incorrect date");
+					}
+
+					$( "#slider-range" ).slider({
+					    range: true,
+					    min: min,
+					    max: max,
+			     	    step: 86400000,
+					    values: [ min, max ],
+			    	    slide: function( event, ui ) {
+						      
+				        $( "#range" ).val( $.datepicker.formatDate('dd/MM/yy', createDate(ui.values[ 0 ])) + " - " + $.datepicker.formatDate('dd/MM/yy', createDate(ui.values[ 1 ] )));
+						  }
+					});
+
+				    $( "#range" ).val( $.datepicker.formatDate('dd/MM/yy', createDate($( "#slider-range" ).slider( "values", 0 ))) +
+					      " - " + $.datepicker.formatDate('dd/MM/yy', createDate($( "#slider-range" ).slider( "values", 1 ))));
+				}else{
+					var bb_period_div = document.getElementById("basket-ball-period");
+					bb_period_div.style.visibility = "visible";
+    				bb_period_div.style.display = "block";
+
+					min = 0;
+					max = 720;
+
+					if(!min && !max){
+						alert("Incorrect Range");
+					}
+
+					$( "#slider-range" ).slider({
+					    range: true,
+					    min: min,
+					    max: max,
+			     	    step: 60,
+					    values: [ min, max ],
+			    	    slide: function( event, ui ) {
+			    	    	start = (ui.values[ 0 ])/60;
+			    	    	end = (ui.values[ 1 ])/60;
+				       
+				        	$( "#range" ).val( start + " - " + end);
+					     }
+					});
+
+					start = $( "#slider-range" ).slider( "values", 0 ) / 60;
+					end = $( "#slider-range" ).slider( "values", 1 ) / 60;
+				    $( "#range" ).val(start +
+					      " - " + end);
+				}
+		}
+
+
+
+    	function getURLParameters() 
+		{
+		    var sURL = window.document.URL.toString();  
+		    if (sURL.indexOf("?") > 0)
+		    {
+		       var arrParams = sURL.split("?");    
+		       queryParams = arrParams[1];
+		       queryURL = arrParams[1];
+		       if(queryParams.indexOf("&") > 0){
+		       		var queryParamsSplitArray = queryParams.split("&");
+		       		var selectedDataSetURL = queryParamsSplitArray[0];
+		       		objectParamsURL = queryParamsSplitArray[1];
+		       		if(selectedDataSetURL.indexOf("=") > 0){
+		       			selectedDataSet = selectedDataSetURL.split("=")[1];
+		       			selectedDataSet = selectedDataSet.replace("%20", " ");
+		       		}
+		       }
+		    }
+
+		    return "No Parameters Found";
+		}
+
+		function onCheck(){
+			if(document.getElementById("all_bb_period_checkbox").checked){
+				document.getElementById("bb_time_period").disabled = true;
+			}else{
+				document.getElementById("bb_time_period").disabled = false;
+			}
+		}
+
+    </script>
+  </body>
+</html>

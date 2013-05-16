@@ -17,10 +17,12 @@ foreach ($splitArray as $value) {
 	    $whereQuery = $whereQuery . " or ";
 	}
 
-	$whereQuery = $whereQuery . "t.object_id = " . $value;
+	//$whereQuery = $whereQuery . "t.object_id = " . $value;
+	$whereQuery = $whereQuery . "t.user_id = " . $value;
 }
 
-$query = 'select t.object_id, t.timestamp_without_tz, t.object_position_x, t.object_position_y from ak_spatiotemporal_data_table t where' . ' ' . $whereQuery;
+//$query = 'select t.object_id, t.timestamp_without_tz, t.object_position_x, t.object_position_y from ak_spatiotemporal_data_table t where' . ' ' . $whereQuery;
+$query = 'select t.user_id, t.std_timestamp, t.latitude, t.longitude from twitter_spatiotemporal_data_table t where' . ' ' . $whereQuery;
 error_log(print_r($query,true));
 
 $result = pg_query($connect, $query);

@@ -4,34 +4,215 @@
 		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
   		<script type="text/javascript" src="./jslib/heatmap.js"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>	
+		<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> 
   		<script src="http://maps.googleapis.com/maps/api/js?libraries=geometry,visualization&sensor=true"></script>
 		<script src="./jslib/controlpanel.js"></script>
+		<script src="./jslib/heatmap.js"></script>
 		<script src="./jslib/histogram.js"></script>
 
+	<style>
+	/*	 body,h1,h2,h3,p,
+	input, select, label{
+	   
+	    font-family:Arial, Helvetica, sans-serif;
+	}*/
+
+	 .next_button {
+		-moz-box-shadow:inset 0px -4px 0px 0px #ffffff;
+		-webkit-box-shadow:inset 0px -4px 0px 0px #ffffff;
+		box-shadow:inset 0px -4px 0px 0px #ffffff;
+		background-color:#ededed;
+		-moz-border-radius:6px;
+		-webkit-border-radius:6px;
+		border-radius:6px;
+		border:2px solid #dbdbdb;
+		display:inline-block;
+		color:#777777;
+		font-family:arial;
+		font-size:14px;
+		font-weight:bold;
+		padding:6px 24px;
+		text-decoration:none;
+		text-shadow:1px 1px 0px #ffffff;
+		height: 29px;
+	}.next_button:hover {
+		background-color:#dfdfdf;
+	}.next_button:active {
+		position:relative;
+		top:1px;
+	}
+
+	.styled-select-option select{
+	   width: 180px;
+	   height: 28px;
+	   overflow: hidden;
+	/*   background: url(new_arrow.png) no-repeat right #ddd;*/
+	   border: 1px solid #ccc;
+	 }
+
+	 .objects-combo{
+	   width: 140px;
+	   height: 100px;
+	   overflow: hidden;
+	/*   background: url(new_arrow.png) no-repeat right #ddd;*/
+	   border: 1px solid #ccc;
+	 }
+
+	 label {
+		color: #B4886B;
+		font-weight: bold;
+		display: block;
+		/*width: 150px;*/
+		float: left;
+	}
+
+	p{
+		color: #B4886B;
+		font-weight: bold;
+		display: block;
+	}
+
+	body{	/* styling the body */
+	    margin-top:20px;
+	   /* color:#51555C;*/
+	    font-size:16px;
+	    background-color:#123456;
+	}
+
+	input[type="checkbox"] + label span {
+	    display:inline-block;
+	    width:19px;
+	    height:19px;
+	    margin:-1px 4px 0 0;
+	    vertical-align:middle;
+	    cursor:pointer;
+	}
+
+
+	#rounded{	/* the outermost div element */
+	    width:800px;
+	    margin:20px auto;	/*center it on the page*/
+	}
+
+	.container{	/* this one contains our navigation, titles, and fetched content */
+	    background-color:#FFFFFF;
+	    padding:10px 20px 20px 20px;
+	}
+
+	h1{	/* the heading */
+	    font-size:28px;
+	    font-weight:bold;
+	    font-family:"Trebuchet MS",Arial, Helvetica, sans-serif;
+	}
+
+	h2{	/* the subheading */
+	    font-weight:normal;
+	    font-size:20px;
+
+	    color:#999999;
+	}
+
+	</style>
 
 	</head>
+
+	<script>
+
+	 window.onload=function(){
+        getURLParameters();
+    }
+
+    function getURLParameters(){
+    	 var sURL = window.document.URL.toString();  
+		    if (sURL.indexOf("?") > 0)
+		    {
+		       var arrParams = sURL.split("?");    
+		       queryParams = arrParams[1];
+		       queryURL = arrParams[1];
+		       if(queryParams.indexOf("&") > 0){
+		       		var queryParamsSplitArray = queryParams.split("&");
+		       		var selectedDataSetURL = queryParamsSplitArray[0];
+		       		objectParamsURL = queryParamsSplitArray[1];
+		       		if(selectedDataSetURL.indexOf("=") > 0){
+		       			selectedDataSet = selectedDataSetURL.split("=")[1];
+		       			selectedDataSet = selectedDataSet.replace("%20", " ");
+		       			var combo = document.getElementById("ds_select");
+		       			for (i=0;i<combo.length;  i++) {
+								
+								if(combo[i].value == selectedDataSet){
+								  combo[i].selected = true;
+								  break;
+								}
+						}
+		       		}
+		       }
+
+		       //Set the checkbox
+		       document.getElementById("HeatMap").checked = true;
+
+		       var splitObjects;
+		       if(objectParamsURL.indexOf("=") > 0){
+		       		var objectParams = objectParamsURL.split("=");
+		       		var objectsArr = objectParams[1];
+
+		       		if(objectsArr.length > 0){
+		       			splitObjects = objectsArr.split(",");
+		       	
+						fnSelectData(selectedDataSet, splitObjects);
+
+		       		}
+		       }
+		    }
+    }
+
+	</script>
 	<body>
-		<div id="part1">
-			<h2>Control Panel</h2>
-			<div id="dataset">
-				<label for="dataset">Data Set</label><br/>
-				<select id="ds_select" onchange="fnSelectData(value)">
-					<option value="select">--select--</option>
-					<option value="Campus Cruiser">Campus Cruiser</option>
-					<option value="BasketBall">Basketball</option>
-					<option value="Twitter">Twitter</option>
-				</select>			
+		<div id="rounded">
+			<img src="img/top_bg.gif" /><!-- image with rounded left and right top corners -->
+			<div id="main" class="container">
+
+			<h1 align="center">Spatiotemporal Data Analytics Tool</h1>
+			<div id="dataset" class = "styled-select-option">
+				<label for="dataset">Data Set :</label> </br>
+				<div id="select-combo">
+					<select id="ds_select" onchange="fnSelectData(value, null)">
+						<option value="select">--select--</option>
+						<option value="Campus Cruiser">Campus Cruiser</option>
+						<option value="BasketBall">Basketball</option>
+						<option value="Twitter">Twitter</option>
+					</select>	
+				</div>		
 			</div>
-			<div id="viz" name="viz" style="visibility: hidden">
-				<p>Select the Visualization you want to see</p>
-				<input type="checkbox" name="vizList"  value="Histogram">Histogram<br>
-				<input type="checkbox" name="vizList"  value="ScatterPlot">Scatter Plot<br>
-				<input type="checkbox" name="vizList"  value="BubblePlot">Bubble Plot<br>
-				<input type="checkbox" name="vizList"  value="HeatMap">Heat Map<br>
+
+			<!-- </br> -->
+			<div id="progress-bar-id" class="progress-bar-wrapper"  style="visibility: hidden;">
+				<progress id="progressbar" value="0" max="100"></progress>
+				<span class="progress-value">0%</span>
 			</div>
-			<div id="objectset" name="objectset" class="objectset">
+
+			<div id="viz-parent" style="visibility: hidden">
+				<div id="viz" name="viz" class="checkbox">
+					<p>Select the Visualization you want to see :</p>
+					<input type="checkbox" name="vizList" id="Histogram" value="Histogram">Histogram<br>
+					<input type="checkbox" name="vizList" id="ScatterPlot" value="ScatterPlot">Scatter Plot<br>
+					<input type="checkbox" name="vizList" id="BubblePlot" value="BubblePlot">Bubble Plot<br>
+					<input type="checkbox" name="vizList" id="HeatMap" value="HeatMap">Heat Map<br>
+				</div>
+				<div id="objectset" name="objectset" class="objectset">
+					<span>
+						<p>Select the objects that you want to trace</p>
+						
+					<!-- 	<label for='ol'>Object List</label><br/> -->
+						<select name="combo" class = "objects-combo" id="combo" multiple="multiple"></select>
+					</span>
+					<input type="button" class="next_button" name="btnObjSelect" id="btnObjSelect" value="Next" onclick="fnGetSelectedObjects()"/>	
+				</div>
 			</div>
+
+			</div>
+
+			<img src="img/bottom_bg.gif" />
 		</div>
 	</body>
 </html>
